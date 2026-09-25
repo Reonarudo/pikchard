@@ -30,6 +30,6 @@
     "@codemirror/state": "^6.7.5",
     "@lezer/generator": "^1.8.0",
     "@pikchard/pikchr-corpus": "^0.1.0",
-    "@types/node": "^22.20.4"
+    "@types/node": "^26.6.2"
   }
 }
