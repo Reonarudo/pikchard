@@ -1,0 +1,6 @@
+    A: [
+      oval "Hello"
+      arrow
+      box "World" radius 4px
+    ]
+    Border: box thin width A.width+0.5in height A.height+0.5in at A.center

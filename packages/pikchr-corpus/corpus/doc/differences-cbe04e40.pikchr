@@ -1,0 +1,5 @@
+box "default" italic "box" italic
+move
+box "width 150%" width 150%
+move
+box "wid 75%" wid 75%

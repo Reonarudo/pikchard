@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pikchard</title>
+    <!--
+      The browser's own chrome, in the palette's bar colour for each scheme
+      (#1025). A pair because the manifest's one colour cannot follow the theme.
+    -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f3f3" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#262626" />
+    <script>
+      /*
+        The theme, before anything is painted (#1022).
+
+        Inline and duplicated on purpose: the bundle is a module, so it runs after
+        the document has been laid out, and a theme applied there is one paint too
+        late — which on a dark desktop is a white flash. `src/theme.ts` is the same
+        reading for every paint after this one, and `pikchard.theme` is the one
+        thing the two copies must agree on (there is a test).
+
+        Wrapped in try/catch because reading `localStorage` *throws* in Firefox
+        when storage is blocked for the origin.
+      */
+      (() => {
+        let choice = "system";
+        try {
+          choice = localStorage.getItem("pikchard.theme") ?? "system";
+        } catch {}
+        const theme =
+          choice === "light" || choice === "dark"
+            ? choice
+            : matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

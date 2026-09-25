@@ -1,0 +1,5 @@
+box "smoke.pikchr" fit
+arrow
+circle "opened" fit
+arrow
+box "from the OS" fit

@@ -1,0 +1,7 @@
+text "Unfitted:"
+diamond "D"
+text "Properly fitted:"
+diamond "D" fit
+text "Badly fitted:"
+box invis "D" fit
+line from last.w to last.n to last.e to last.s close

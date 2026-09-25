@@ -1,0 +1,21 @@
+box "Origin"
+Obstacle: oval ht 300% wid 30% with .n at linewid right of Origin.ne;
+box "Destination" with .nw at linewid right of Obstacle.n
+line invis from 1st oval.s to 1st oval.n "Obstacle" aligned
+X: \
+   arrow from Origin.s \
+      down until even with 1cm below Obstacle.s \
+      then right until even with Destination.s \
+      then to Destination.s
+
+line invis color gray from X.start to 2nd vertex of X \
+    "down until even with" aligned small \
+    "1cm below Obstacle.s" aligned small
+line invis color gray from 2nd vertex of X to 3rd vertex of X \
+    "right until even with Destination.s" aligned small above
+line invis color gray from 3rd vertex of X to 4th vertex of X \
+    "to Destination.s" aligned small above
+
+# Evidence that the alternative arrow is equivalent:
+assert( 2nd vertex of X == (Origin.s, 1cm below Obstacle.s) )
+assert( 3rd vertex of X == (Destination.s, 1cm below Obstacle.s) )

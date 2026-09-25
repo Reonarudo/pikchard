@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Pikchr as a type Linux knows about (#1018, #1057).
+
+  Shipped to /usr/share/mime/packages/ by the deb and the rpm, because a
+  `.desktop` file's `MimeType=` lists *types* and not extensions: without this
+  packet a `.pikchr` file sniffs as `text/plain` and Pikchard's association
+  claims nothing at all. No post-install script runs it in — dpkg triggers and
+  Fedora's `%transfiletriggerin` both fire `update-mime-database` on this
+  directory, which is why `shared-mime-info` is a package dependency.
+
+  `text/x-pikchr` rather than `application/vnd.pikchr`, despite RFC 6838 §3.4
+  discouraging the `x-` prefix: the `text/plain` subclassing below is what makes
+  every other tool on the machine — an editor, `less`, a file manager's preview —
+  handle a Pikchr Script sensibly, and that is worth more than the registry.
+
+  The AppImage gets none of this: it is never installed, so nothing reaches this
+  directory and no database is rebuilt. That is a documented difference, not a
+  bug to work around.
+-->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="text/x-pikchr">
+    <comment>Pikchr diagram</comment>
+    <sub-class-of type="text/plain"/>
+    <glob pattern="*.pikchr"/>
+    <glob pattern="*.pik"/>
+  </mime-type>
+</mime-info>

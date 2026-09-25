@@ -1,0 +1,126 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`arrows in three spellings > parses with no error nodes 1`] = `
+"[typeName arrow] [operator ->]
+[typeName arrow] [operator <->] [string "both"] [keyword above]
+[typeName arrow] [operator &rarr;]
+[typeName arrow] [operator ↔]"
+`;
+
+exports[`brace inside a macro body string > parses with no error nodes 1`] = `
+"[keyword define] [macroName tricky] { [typeName box] [string "a } b"] [comment # }]
+ }
+[macroName tricky]"
+`;
+
+exports[`broken line between good ones > keeps its colours despite the error 1`] = `
+"[typeName box] [string "before"]
+[typeName circle] [propertyName wid] [propertyName wid] [propertyName wid] [keyword at] [keyword at]
+[typeName box] [string "after"]
+[typeName arrow] [operator ->] [keyword from] [keyword last] [typeName box]"
+`;
+
+exports[`comments and continuation > parses with no error nodes 1`] = `
+"[typeName box] [comment /* inline */] [propertyName wid] [number 1] \\
+  [propertyName ht] [number 2] [comment # trailing]
+[comment // whole line]
+[typeName circle]"
+`;
+
+exports[`compass word as a variable > parses with no error nodes 1`] = `
+"[variableName n] [operator =] [number 3]
+[typeName box] [propertyName wid] [variableName n]
+[typeName line] [keyword then] [propertyName n]"
+`;
+
+exports[`empty statements and separators > parses with no error nodes 1`] = `
+";;
+[typeName box];;[typeName circle]
+
+
+;
+[typeName arrow]"
+`;
+
+exports[`every one of the fourteen classes > parses with no error nodes 1`] = `
+"[typeName arc]; [typeName arrow]; [typeName box]; [typeName circle]; [typeName cylinder]; [typeName diamond]; [typeName dot]
+[typeName ellipse]; [typeName file]; [typeName line]; [typeName move]; [typeName oval]; [typeName spline]; [typeName text] [string "t"]"
+`;
+
+exports[`half-typed attribute > keeps its colours despite the error 1`] = `"[typeName box] [propertyName wid] "`;
+
+exports[`keywords that are also variables > parses with no error nodes 1`] = `
+"[propertyName fill] [operator =] [number 0.5]
+[propertyName thickness] [operator *=] [number 2]
+[typeName box] [propertyName wid] ([propertyName fill]) + [number 1]
+[keyword print] [propertyName fill], [propertyName color], [propertyName thickness]"
+`;
+
+exports[`macro call spanning a continuation line > parses with no error nodes 1`] = `
+"[keyword define] [macroName pair] { [typeName box] [string "$1"] ; [typeName box] [string "$2"] }
+[macroName pair]("one", \\
+  "two")"
+`;
+
+exports[`macro definition and call > parses with no error nodes 1`] = `
+"[keyword define] [macroName pill] { [typeName box] [propertyName rad] [number 0.3] [variableName2 $1] }
+[macroName pill]("one")
+[macroName pill]("two") [keyword at] [keyword last] [typeName box] + ([number 0], -[number 0.6])"
+`;
+
+exports[`numbers, units and ordinals > parses with no error nodes 1`] = `
+"[typeName box] [propertyName wid] [number 2cm] [propertyName ht] [number .5in] [propertyName rad] [number 3px]
+[typeName circle] [propertyName fill] [number 0xff00ff]
+[typeName move] [keyword to] [number 3rd] [typeName box]
+[typeName line] [keyword to] [keyword first] [typeName circle]"
+`;
+
+exports[`plain statements > parses with no error nodes 1`] = `
+"[keyword down]
+[typeName box] [string "start"]
+[typeName arrow]
+[typeName circle] [string "middle"] [propertyName fill] [number 0xeeeeee]
+[typeName arrow]
+[typeName box] [string "finish"]"
+`;
+
+exports[`position arithmetic > parses with no error nodes 1`] = `
+"[labelName Origin]: [typeName dot]
+[typeName box] [keyword at] [labelName Origin] + ([number 0.5], [number 0])
+[typeName circle] [keyword at] [number 1]/[number 2] [keyword of] [keyword the] [keyword way] [keyword between] [labelName Origin] [keyword and] [keyword last] [typeName box]"
+`;
+
+exports[`position operators > parses with no error nodes 1`] = `
+"[labelName C]: [typeName circle]
+[typeName box] [keyword at] [number 1cm] [keyword right] [keyword of] [labelName C]
+[typeName text] [string "t"] [keyword at] [number 0.4] [keyword above] [labelName C]
+[typeName dot] [keyword at] [number 1cm] [keyword heading] [number 30] [keyword from] [labelName C]
+[typeName line] [keyword from] [labelName C] [keyword go] [number 1cm] [keyword heading] [number 45]"
+`;
+
+exports[`text attributes stack > parses with no error nodes 1`] = `"[typeName box] [string "top"] [keyword above] [string "bottom"] [keyword below] [string "b"] [propertyName big] [propertyName bold] [propertyName italic] [keyword ljust]"`;
+
+exports[`the four kinds of dot > parses with no error nodes 1`] = `
+"[labelName Outer]: [ [labelName Inner]: [typeName box] ]
+[typeName circle] [keyword at] [labelName Outer].[labelName Inner].[propertyName variableName ne]
+[variableName x1] [operator =] [labelName Outer].[labelName Inner].[propertyName x]
+[keyword print] [labelName Outer].[propertyName wid]"
+`;
+
+exports[`typing a keyword > keeps its colours despite the error 1`] = `"[typeName box] [variableName colo]"`;
+
+exports[`unclosed bracket > keeps its colours despite the error 1`] = `
+"[labelName A]: [ [typeName box]
+  [typeName circle]
+[typeName arrow] [keyword from] [labelName A].[propertyName variableName n]"
+`;
+
+exports[`unclosed macro body > keeps its colours despite the error 1`] = `
+"[keyword define] [macroName half] { [typeName box] [string "a"]
+[typeName circle]"
+`;
+
+exports[`unterminated string > keeps its colours despite the error 1`] = `
+"[typeName box] [string "never closed]
+[string circle "]fine""
+`;

@@ -1,0 +1,117 @@
+name: Release
+
+# One `v*` tag does two independent things (ADR 0001, #1096):
+#
+# - builds every desktop installer into ONE draft release, which a human
+#   publishes only after docs/desktop-release-checklist.md passes;
+# - deploys the web build to GitHub Pages.
+#
+# There is deliberately no `needs:` between them. A withheld desktop artifact
+# leaves the web app live; the alternative is rolling back a Pages deploy.
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  version:
+    name: The tag names the version being built
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          app="v$(node -p 'require("./app/src-tauri/tauri.conf.json").version')"
+          if [ "$app" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME but tauri.conf.json says $app"
+            exit 1
+          fi
+
+  desktop:
+    name: Desktop installers (${{ matrix.name }})
+    needs: version
+    permissions:
+      contents: write
+    strategy:
+      # One leg failing must not cancel the rest: the gate is per artifact.
+      fail-fast: false
+      # Keep in step with ci.yml's `desktop` job.
+      matrix:
+        include:
+          - name: macOS universal
+            os: macos-latest
+            args: --target universal-apple-darwin --bundles app,dmg
+            rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
+          - name: Windows
+            os: windows-latest
+            args: --bundles nsis
+          - name: Linux
+            os: ubuntu-22.04
+            args: --bundles appimage,deb
+    runs-on: ${{ matrix.os }}
+    env:
+      # Ad-hoc signing (#1024). Apple silicon will not run native code with no
+      # signature at all, and Tauri skips `codesign` when no identity is set,
+      # so a universal `.app` built from `lipo` would carry none. `-` makes
+      # Tauri seal the whole bundle itself, before the `.dmg` is made from it.
+      # A `codesign` step of our own could not do that: the `.dmg` bundler
+      # rebuilds the `.app` first and would discard the signature.
+      APPLE_SIGNING_IDENTITY: "-"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
+      # No rust-cache, unlike ci.yml: a shipped binary is built from clean,
+      # never from a cache any PR could have written.
+      - run: npm ci
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: app
+          tauriScript: npm run tauri
+          args: ${{ matrix.args }}
+          tagName: ${{ github.ref_name }}
+          releaseName: Pikchard ${{ github.ref_name }}
+          releaseBody: >-
+            Unsigned builds: see the README for getting past each OS's warning.
+            Do not publish this draft until docs/desktop-release-checklist.md passes.
+          # Load-bearing, not a default to tidy away: publishing is the human
+          # act that asserts the checklist passed (#1096). Every leg uploads to
+          # this one draft, so one OS's artifact can be deleted on its own.
+          releaseDraft: true
+          prerelease: false
+      - if: runner.os == 'macOS'
+        run: codesign --verify --deep --strict app/src-tauri/target/universal-apple-darwin/release/bundle/macos/Pikchard.app
+
+  pages:
+    name: Web app to GitHub Pages
+    needs: version
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # `TAURI_ENV_PLATFORM` must be unset: it is what gives this build its
+      # service worker, its CSP and its `/pikchard/` base (#1025).
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: app/dist
+      - id: deploy
+        uses: actions/deploy-pages@v4

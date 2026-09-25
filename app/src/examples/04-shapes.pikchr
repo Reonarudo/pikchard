@@ -1,0 +1,9 @@
+cylinder "Database" fit
+move
+file "Report" fit
+move
+oval "Queue" fit
+move
+circle "Node"
+move
+ellipse "Cloud" fit

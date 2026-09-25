@@ -1,0 +1,5 @@
+box "radius 0"
+move
+box "radius 5px" rad 5px
+move
+box "radius 20px" rad 20px

@@ -1,0 +1,5 @@
+box "Warm" fill lightyellow color darkred
+move
+box "Cool" fill lightblue color navy
+move
+box "Fresh" fill lightgreen color darkgreen

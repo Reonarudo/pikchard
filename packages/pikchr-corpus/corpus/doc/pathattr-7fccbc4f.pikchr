@@ -1,0 +1,9 @@
+leftmargin = 1cm
+A1: arrow thick right 4cm then up 3cm
+dot at A1.start
+X1: line thin color gray from (0,-3mm) down 0.4cm
+X2: line same from (4cm,-3mm) down 0.4cm
+arrow thin color gray from X1 to X2 "4cm" above
+X3: line same from (4cm+3mm,0) right 0.4cm
+X4: line same from (4cm+3mm,3cm) right .4cm
+arrow thin color gray from X3 to X4 "3cm" aligned above

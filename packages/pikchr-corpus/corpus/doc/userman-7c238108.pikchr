@@ -1,0 +1,3 @@
+   box "ljust" ljust "longer line" ljust "even longer line" ljust fit
+   move
+   box "rjust" rjust "longer line" rjust "even longer line" rjust fit

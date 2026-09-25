@@ -1,0 +1,3 @@
+    right; box; circle; cylinder
+    dot color green at 1st box.start
+    dot color blue at 1st box.end

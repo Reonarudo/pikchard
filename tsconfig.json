@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/pikchr-corpus" },
+    { "path": "./packages/pikchr-wasm" },
+    { "path": "./packages/lang-pikchr" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions the main window needs, backing TauriPlatform (#1041). The filesystem is deliberately scoped at runtime rather than here: open_path allows each path the user actually chose, and that scope is in-memory and gone on the next launch (#1057).",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "fs:allow-write-text-file",
+    "fs:allow-write-file",
+    "clipboard-manager:allow-write-image",
+    "opener:allow-open-url"
+  ]
+}

@@ -1,0 +1,320 @@
+// A structure-preserving port of upstream `pikchr.y` (ADR 0002, ADR 0007).
+//
+// Every production of upstream's grammar gets a named node, in upstream's own
+// vocabulary — Lvalue, Rvalue, Basetype, AttributeList, Place2, Objectname,
+// Nth — so that highlighting, `statementAt`, `symbols` and later completion,
+// hover and Lints all read named nodes rather than re-derive structure from
+// tokens. Where upstream leans on a lemon feature Lezer does not have
+// (`%fallback ID EDGEPT`, the lookahead-driven dot tokens, the Macro argument
+// scan) this reaches for the nearest Lezer equivalent rather than reshaping
+// the grammar.
+//
+// Transcribed from the pinned check-in. An upstream bump means re-checking the
+// keyword tables, the fourteen class names and the production set.
+//
+// Generated with `npm run build:grammar -w @pikchard/lang-pikchr`.
+
+@precedence { paramValue @left, uminus @right, times @left, plus @left, of @left }
+
+// *Script*, not *Document*: a Document is the file, and a Markdown one holds
+// many Scripts (ADR 0008). Nested inside `@codemirror/lang-markdown`, this is
+// the node for one Fence's contents.
+@top Script { StatementList }
+
+@skip { space | Comment }
+
+StatementList { Statement? (eol Statement?)* }
+
+Statement {
+    Direction
+  | Assignment
+  | LabelledStatement
+  | UnnamedStatement
+  | PrintStatement
+  | AssertStatement
+  | DefineStatement
+  | MacroCall
+}
+
+// Not in pikchr.y: upstream expands Macros in the LEXER, so its parser never
+// sees a call. A Lezer grammar has to invent the production, including the
+// bare-name form, and it needs its own attribute list or `pill("x") at last
+// box` fails.
+MacroCall { Id MacroArgs? attributes }
+
+Direction { kw<"up"> | kw<"down"> | kw<"left"> | kw<"right"> }
+
+Assignment { Lvalue Assign Rvalue }
+
+Lvalue { Id | kw<"fill"> | kw<"color"> | kw<"thickness"> }
+
+Rvalue { Expr | PlaceName }
+
+LabelledStatement { PlaceName ":" (UnnamedStatement | Position) }
+
+PrintStatement { kw<"print"> Prlist }
+
+Prlist { Pritem ("," Pritem)* }
+
+Pritem { kw<"fill"> | kw<"color"> | kw<"thickness"> | Rvalue | String }
+
+AssertStatement {
+  kw<"assert"> "(" (Expr Eq Expr | Position Eq Position) ")"
+}
+
+DefineStatement { kw<"define"> (Id | Parameter) MacroBody }
+
+// NOT upstream's opaque CODEBLOCK token. pikchr lexes a Macro body as one blob
+// because its parser never needs to look inside; an editor does, so the body
+// is a nested statement list and highlights like any other Script.
+MacroBody { "{" StatementList "}" }
+
+UnnamedStatement { Basetype attributes }
+
+Basetype {
+    ClassName
+  | String textposition
+  | Sublist
+}
+
+Sublist { "[" StatementList "]" }
+
+Relexpr { Expr "%"? }
+
+optrelexpr { Relexpr }
+
+// Upstream's `attribute_list` can be empty. Here the *node* cannot: an empty
+// one would be placed after the whitespace following the Basetype, stretching
+// every `box` Statement's Span over the space that follows it — and Spans are
+// what the Script ↔ Diagram map and the Diagnostics are built from.
+attributes { AttributeList? }
+
+AttributeList { Relexpr Attribute* | Attribute+ }
+
+Attribute {
+    Numproperty Relexpr
+  // Split, where upstream writes `dash_property expr|ε`, so that `dotted $1`
+  // reads as a dash length rather than as `dotted` followed by a bare `$1`
+  // attribute. Both are grammatical now that a Parameter is an expression, and
+  // the value reading is the one a Macro body means.
+  | Dashproperty !paramValue Expr
+  | Dashproperty
+  | Colorproperty Rvalue
+  | kw<"go">? Direction !paramValue optrelexpr
+  | kw<"go">? Direction
+  | kw<"go">? Direction even Position
+  | kw<"close">
+  | kw<"chop">
+  | kw<"from"> Position
+  | kw<"to"> Position
+  | kw<"then">
+  | kw<"then"> !paramValue optrelexpr? kw<"heading"> Expr
+  | kw<"then"> !paramValue optrelexpr? EdgePt
+  | kw<"go"> !paramValue optrelexpr? kw<"heading"> Expr
+  | kw<"go"> !paramValue optrelexpr? EdgePt
+  | Boolproperty
+  | kw<"at"> Position
+  | kw<"with"> Withclause
+  | kw<"same">
+  | kw<"same"> kw<"as"> Object
+  | String textposition
+  | kw<"fit">
+  | kw<"behind"> Object
+  // A Macro parameter can stand for any category at all, so once a body is
+  // parsed rather than kept opaque, `$1` has to be grammatical as a whole
+  // Attribute and as a whole Position — and, via Expr below, as any value
+  // inside one. A lone `$1` is therefore genuinely ambiguous between this rule
+  // and `Relexpr`, which is what the shared marker is for: the same trick the
+  // grammar already plays on `%fallback ID EDGEPT`.
+  | Parameter ~attrOrExpr
+}
+
+even { kw<"until">? kw<"even"> kw<"with"> }
+
+// Spellings upstream's keyword table carries for one word each.
+heightKw { kw<"height"> | kw<"ht"> }
+widthKw { kw<"width"> | kw<"wid"> }
+radiusKw { kw<"radius"> | kw<"rad"> }
+invisKw { kw<"invis"> | kw<"invisible"> }
+monoKw { kw<"mono"> | kw<"monospace"> }
+lastKw { kw<"last"> | kw<"previous"> }
+topKw { kw<"top"> | kw<"t"> }
+
+Withclause {
+    DotE Edge kw<"at"> Position
+  | Edge kw<"at"> Position
+}
+
+Numproperty { heightKw | widthKw | radiusKw | kw<"diameter"> | kw<"thickness"> }
+
+Dashproperty { kw<"dotted"> | kw<"dashed"> }
+
+Colorproperty { kw<"fill"> | kw<"color"> }
+
+Boolproperty {
+    kw<"cw"> | kw<"ccw"> | LArrow | RArrow | LRArrow
+  | invisKw | kw<"thick"> | kw<"thin"> | kw<"solid">
+}
+
+// Optional at the use site, never empty as a node — same reason `attributes`
+// wraps `AttributeList`: a `box "a"` Statement's Span must end at the String.
+textposition { Textposition? }
+
+Textposition {
+  ( kw<"center"> | kw<"ljust"> | kw<"rjust"> | kw<"above"> | kw<"below">
+  | kw<"italic"> | kw<"bold"> | monoKw | kw<"aligned"> | kw<"big">
+  | kw<"small"> )+
+}
+
+Position {
+    Expr "," Expr
+  | Place
+  | Place "+" Expr "," Expr
+  | Place "-" Expr "," Expr
+  | Place "+" "(" Expr "," Expr ")"
+  | Place "-" "(" Expr "," Expr ")"
+  | "(" Position "," Position ")"
+  | "(" Position ")"
+  | Expr between Position kw<"and"> Position
+  | Expr "<" Position "," Position ">"
+  | Expr kw<"above"> Position
+  | Expr kw<"below"> Position
+  | Expr kw<"left"> kw<"of"> Position
+  | Expr kw<"right"> kw<"of"> Position
+  | Expr kw<"heading"> EdgePt kw<"of"> Position
+  | Expr EdgePt kw<"of"> Position
+  | Expr kw<"heading"> Expr kw<"from"> Position
+  // A lone `$1` is a Position and, via Expr, a value inside one. Both readings
+  // span the same character, so the marker keeps them both alive and lets the
+  // one that cannot finish die.
+  | Parameter ~paramPosition
+}
+
+between {
+    kw<"way"> kw<"between">
+  | kw<"between">
+  | kw<"of"> kw<"the"> kw<"way"> kw<"between">
+}
+
+Place { Place2 | Edge kw<"of"> Object }
+
+Place2 { Object | Object DotE Edge | nth kw<"vertex"> kw<"of"> Object }
+
+Edge {
+    kw<"center"> | EdgePt ~edgeOrVar | topKw | kw<"bottom"> | kw<"start">
+  | kw<"end"> | kw<"right"> | kw<"left">
+}
+
+Object { Objectname | Nth | Nth (kw<"of"> | kw<"in">) Object }
+
+Objectname { kw<"this"> | PlaceName | Objectname DotU PlaceName }
+
+Nth {
+    nth ClassName
+  | nth lastKw ClassName
+  | lastKw ClassName
+  | lastKw
+  | nth "[" "]"
+  | nth lastKw "[" "]"
+  | lastKw "[" "]"
+}
+
+nth { Ordinal | kw<"first"> }
+
+Expr {
+    Expr !plus ("+" | "-") Expr
+  | Expr !times ("*" | "/") Expr
+  | !uminus ("-" | "+") Expr
+  | "(" Expr ")"
+  | "(" (kw<"fill"> | kw<"color"> | kw<"thickness">) ")"
+  | Number
+  | Id
+  // Upstream has no such production: it substitutes `$1` in the lexer, so its
+  // parser only ever sees whatever the argument was. Here a parameter has to
+  // be an expression in its own right, or `box wid $1` — the commonest line
+  // in any Macro body — fails to parse.
+  | Parameter ~paramPosition ~attrOrExpr
+  | Func1 "(" Expr ")"
+  | Func2 "(" Expr "," Expr ")"
+  | kw<"dist"> "(" Position "," Position ")"
+  | Place2 DotXY (kw<"x"> | kw<"y">)
+  | Object DotL Numproperty
+  | Object DotL Dashproperty
+  | Object DotL Colorproperty
+}
+
+// `%fallback ID EDGEPT` (pikchr.y:515) has no Lezer equivalent: a compass word
+// may stand in for a Variable name exactly where EDGEPT has no action. The
+// closest Lezer offers is a GLR split — keep both readings alive and let the
+// one that cannot finish die.
+Id { identifier | sigilId | EdgePt ~edgeOrVar }
+
+Func1 { @specialize<identifier, "abs" | "cos" | "int" | "sin" | "sqrt"> }
+Func2 { @specialize<identifier, "max" | "min"> }
+
+// Fourteen, not thirteen: `diamond` is easy to miss (pikchr.y:1772-1927).
+ClassName {
+  @specialize<identifier,
+    "arc" | "arrow" | "box" | "circle" | "cylinder" | "diamond" | "dot" |
+    "ellipse" | "file" | "line" | "move" | "oval" | "spline" | "text">
+}
+
+EdgePt {
+  @specialize<identifier,
+    "n" | "s" | "e" | "w" | "c" | "ne" | "nw" | "se" | "sw" |
+    "north" | "south" | "east" | "west" | "bot">
+}
+
+kw<term> { @specialize[@name={term}]<identifier, term> }
+
+@external tokens dotTokens from "./tokens.js" { DotE, DotXY, DotL, DotU }
+@external tokens macroArgs from "./tokens.js" { MacroArgs }
+
+@tokens {
+  space { ($[ \t\f\r] | "\\" $[ \t\r]* "\n")+ }
+
+  Comment {
+      ("#" | "//") ![\n]*
+    | "/*" (![*] | "*" ![/])* "*"* "*/"
+  }
+
+  eol { "\n" | ";" }
+
+  String { '"' (![\\"] | "\\" _)* '"' }
+
+  unit { "in" | "cm" | "mm" | "pt" | "px" | "pc" }
+
+  Number {
+      $[0-9] $[xX] $[0-9a-fA-F]*
+    | $[0-9]+ ("." $[0-9]*)? unit?
+    | "." $[0-9]+ unit?
+  }
+
+  Ordinal { $[0-9]+ ("st" | "nd" | "rd" | "th") }
+
+  identifier { $[a-z] $[A-Za-z0-9_]* }
+
+  PlaceName { $[A-Z] $[A-Za-z0-9_]* }
+
+  Parameter { "$" $[1-9] }
+
+  sigilId { $[_$@] $[A-Za-z0-9_]* }
+
+  LArrow { "<-" | "←" | "&larr;" | "&leftarrow;" }
+  RArrow { "->" | "→" | "&rarr;" | "&rightarrow;" }
+  LRArrow { "<->" | "↔" | "&leftrightarrow;" }
+
+  Assign { "=" | "+=" | "-=" | "*=" | "/=" }
+  Eq { "==" }
+
+  "(" ")" "[" "]" "{" "}" "," ":" "%" "<" ">" "+" "-" "*" "/"
+
+  @precedence { Ordinal, Number }
+  @precedence { Parameter, sigilId }
+  @precedence { LRArrow, LArrow, "<" }
+  @precedence { RArrow, "-" }
+  @precedence { Eq, Assign }
+  @precedence { Comment, "/" }
+}
+
+@detectDelim

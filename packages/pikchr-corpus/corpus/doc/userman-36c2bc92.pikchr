@@ -1,0 +1,6 @@
+    # The first component of the drawing is a line
+    line
+    // The second component is a box with text "Hello, World!"
+    box "Hello," "World!"
+    /* Finally an arrow */
+    arrow

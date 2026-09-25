@@ -1,0 +1,6 @@
+F: file
+line thin from 2mm right of (F.e,F.n) right 75%
+line thin from F.rad below start of previous right 75%
+arrow <- from 3/4<first line.start,first line.end> up 30%
+arrow <- from 3/4<2nd line.start,2nd line.end> down 30%
+text "radius" above at end of 1st arrow

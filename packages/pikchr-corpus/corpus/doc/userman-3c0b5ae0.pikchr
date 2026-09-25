@@ -1,0 +1,4 @@
+    right; box; C1: circle
+    print "before: ", C1.end.x, ", ", C1.end.y
+    down
+    print "after: ", C1.end.x, ", ", C1.end.y

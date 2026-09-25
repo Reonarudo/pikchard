@@ -1,0 +1,11 @@
+{
+  "$comment": "The pinned upstream pikchr check-in, and the Emscripten that built wasm/ from it. Update the check-in with ./vendor/fetch.sh --record <checkin>.",
+  "checkin": "a7f1c35bc0448daf15e2bafa36e510c1517534e620c452ecb314ed57d974f081",
+  "short": "a7f1c35b",
+  "isoDate": "2026-04-03T10:29:56.574",
+  "version": "1.0 20260403102956",
+  "tarball": "pikchr-a7f1c35b.tar.gz",
+  "sha256": "d9258fda02456a75fb2183d8543426e4bf7f422923d9c8efefa78c77a4db88a5",
+  "url": "https://pikchr.org/home/tarball/a7f1c35bc0448daf15e2bafa36e510c1517534e620c452ecb314ed57d974f081/pikchr-a7f1c35b.tar.gz",
+  "emscripten": "6.0.9"
+}

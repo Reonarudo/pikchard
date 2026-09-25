@@ -1,0 +1,9 @@
+$w = 3.4
+$h = 0.9
+A: box wid $w ht $h fill 0xf4f4f4
+B: box wid $w ht $h fill 0xe6e6e6 with .n at A.s
+text "Client" bold with .w at A.w + (0.1, 0)
+text "Server" bold with .w at B.w + (0.1, 0)
+Q: box "Request" fit at A.c + (-0.4, 0)
+R: box "Handle" fit at B.c + (0.6, 0)
+arrow from Q.s down 0.2 then right 1.0 then to R.n

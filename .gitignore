@@ -1,0 +1,17 @@
+node_modules/
+dist/
+target/
+*.tsbuildinfo
+.DS_Store
+*.log
+.env
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+
+# Tauri
+app/src-tauri/gen/
+# The desktop build that e2e/desktop-csp.spec.ts serves
+dist-desktop/

@@ -1,0 +1,170 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # A change that touches only prose skips everything heavy, so a docs PR
+  # finishes in minutes (#1043). Skipped jobs count as passed for a required
+  # check, so this never blocks a merge.
+  changes:
+    name: What changed
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          # A file is code unless it is under docs/ or is Markdown. No test
+          # reads a Markdown file; the release fixtures are for a human.
+          predicate-quantifier: every
+          filters: |
+            code:
+              - '!docs/**'
+              - '!**/*.md'
+
+  check:
+    name: Build, typecheck, lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+  wasm:
+    name: The committed WASM matches its source
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # The Emscripten version lives in the lock file next to the source it
+      # built: a different version emits different bytes and fails the diff.
+      - id: pin
+        run: echo "emscripten=$(node -p 'require("./packages/pikchr-wasm/vendor/pikchr.lock.json").emscripten')" >> "$GITHUB_OUTPUT"
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: ${{ steps.pin.outputs.emscripten }}
+      - run: npm ci
+      # Contributors get a prebuilt renderer and never need Emscripten. That is
+      # only safe while this job proves the committed bytes are what the pinned
+      # source and the patch actually produce.
+      - run: npm run verify:wasm -w packages/pikchr-wasm
+
+  e2e:
+    name: Playwright
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx --prefix app playwright install --with-deps chromium firefox webkit
+      - run: npm run e2e
+
+  budget:
+    name: Render budget (informational)
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    # A wall-clock measurement on shared hardware: reported on every run so a
+    # regression is visible, but never the reason a change is blocked.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx --prefix app playwright install --with-deps chromium
+      - run: npm run budget -w @pikchard/app
+
+  rust:
+    name: cargo test
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    # The oldest Ubuntu the release builds on, so its WebKitGTK is the one tested.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+      # `generate_context!` embeds `frontendDist` at compile time, tests included.
+      - run: npm ci
+      - run: npm run build
+      - run: cargo test
+        working-directory: app/src-tauri
+
+  desktop:
+    name: Desktop installers (${{ matrix.name }})
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    strategy:
+      fail-fast: false
+      # Keep in step with release.yml, so a PR builds exactly what a tag ships.
+      matrix:
+        include:
+          - name: macOS universal
+            os: macos-latest
+            args: --target universal-apple-darwin --bundles app,dmg
+            rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
+          - name: Windows
+            os: windows-latest
+            args: --bundles nsis
+          - name: Linux
+            os: ubuntu-22.04
+            args: --bundles appimage,deb
+    runs-on: ${{ matrix.os }}
+    env:
+      # Ad-hoc: see release.yml. Harmless off macOS, where nothing reads it.
+      APPLE_SIGNING_IDENTITY: "-"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+      - run: npm ci
+      # No `tagName`, so this builds and uploads nothing.
+      - uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: app
+          tauriScript: npm run tauri
+          args: ${{ matrix.args }}
+      - if: runner.os == 'macOS'
+        run: codesign --verify --deep --strict app/src-tauri/target/universal-apple-darwin/release/bundle/macos/Pikchard.app

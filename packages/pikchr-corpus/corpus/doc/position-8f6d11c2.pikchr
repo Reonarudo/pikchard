@@ -1,0 +1,8 @@
+P1: dot; text "P1" with .s at 2mm above P1
+P2: dot at P1+(4cm,1.5cm); text "P2" with .s at 2mm above P2
+line thin color gray dotted from -.5<P1,P2> to 1.5<P1,P2>
+dot at 3/4<P1,P2>; text "3/4<P1,P2>" at (last dot,P1)
+   arrow thin color gray from last text.n to 1mm south of last dot
+dot at -0.25 of the way between P1 and P2
+   text "-0.25 of the way between P1 and P2" at (last dot,P2)
+   arrow thin color gray from last text.s to 1mm north of last dot

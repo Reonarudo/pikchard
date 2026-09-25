@@ -1,0 +1,10 @@
+S: box "Start" rad 8px
+arrow
+D: diamond "Valid?" fit
+arrow "yes" above
+P: box "Process"
+arrow
+box "Done" rad 8px
+arrow "no" aligned from D.s down 0.6in
+R: box "Fix input"
+arrow from R.w left until even with S then up until even with S.s then to S.s

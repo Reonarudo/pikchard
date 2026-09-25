@@ -1,0 +1,2 @@
+   oval "Hello, World!" fit
+   assert( last oval.w == last oval.e ); # <-- should fail
