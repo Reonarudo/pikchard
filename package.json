@@ -25,10 +25,10 @@
     "clean": "tsc --build --clean && rm -rf app/dist"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.13",
+    "@biomejs/biome": "2.5.14",
     "jsdom": "^29.1.1",
     "typescript": "7.0.2",
     "vite": "8.3.0",
-    "vitest": "5.0.0"
+    "vitest": "5.0.1"
   }
 }
