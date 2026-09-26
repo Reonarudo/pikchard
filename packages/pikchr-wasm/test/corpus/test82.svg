@@ -1,0 +1,18 @@
+<svg xmlns='http://www.w3.org/2000/svg' style='font-size:initial;' class="pikchr" viewBox="0 0 447.149 293.839" data-pikchr-date="20260403102956">
+<circle cx="79.5744" cy="174.506" r="28.3465"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="79.5744" y="174.506" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">A</text>
+<circle cx="223.574" cy="174.506" r="28.3465"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="223.574" y="174.506" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">B</text>
+<circle cx="223.574" cy="30.5065" r="28.3465"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="223.574" y="30.5065" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">C</text>
+<circle cx="367.574" cy="30.5065" r="28.3465"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="367.574" y="30.5065" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">D</text>
+<polygon points="195.228,174.506 183.708,178.826 183.708,170.186" style="fill:rgb(0,0,0)"/>
+<path d="M107.921,174.506L189.468,174.506"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<polygon points="223.574,58.8529 227.894,70.3729 219.254,70.3729" style="fill:rgb(0,0,0)"/>
+<path d="M223.574,146.16L223.574,64.6129"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<polygon points="339.228,30.5065 327.708,34.8265 327.708,26.1865" style="fill:rgb(0,0,0)"/>
+<path d="M251.921,30.5065L333.468,30.5065"  style="fill:none;stroke-width:2.16;stroke:rgb(0,0,0);" />
+<text x="223.574" y="246.319" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">Macros with backslash-escapes around parameters</text>
+<text x="223.574" y="276.559" text-anchor="middle" fill="rgb(0,0,0)" dominant-baseline="central">/forumpost/2026-04-02T16:50:17z</text>
+</svg>

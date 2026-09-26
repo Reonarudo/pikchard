@@ -1,0 +1,6 @@
+  box wid 300% \
+     "above-ljust" above ljust \
+     "above-rjust" above rjust \
+     "centered" center \
+     "below-ljust" below ljust \
+     "below-rjust" below rjust

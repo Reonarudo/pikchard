@@ -1,0 +1,6 @@
+line go 2cm heading 40 then 4cm heading 165 then 1cm heading 280\
+   "radius" "0"
+move to 3cm right of previous.start
+line same "radius" "15px" rad 15px
+move to 3cm right of previous.start
+line same  "radius" "30px" rad 30px

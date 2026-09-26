@@ -1,0 +1,2 @@
+arrow rad 10px go heading 30 then go 200% heading 175 \
+  then go 150% west "arrow" below "radius 10px" below

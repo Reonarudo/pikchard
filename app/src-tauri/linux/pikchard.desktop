@@ -1,0 +1,24 @@
+[Desktop Entry]
+# The desktop entry the deb and the rpm install, as a Handlebars template
+# (#1018, #1057).
+#
+# It exists for one line: `Exec` needs the `%U` field code, and the bundler's
+# default template has none — so a double-clicked file's path never reaches
+# argv, and an "open with" opens Pikchard on nothing.
+#
+# `MimeType` is spelled out rather than templated: the template's variables are
+# `categories`, `comment`, `exec`, `icon` and `name`, and no more, so there is no
+# `{{mime_type}}` to interpolate. The types must match `bundle.fileAssociations`
+# in `tauri.conf.json`, and a test in `lib.rs` holds the two together.
+# `text/x-pikchr` is Pikchard's own, declared by `pikchard-mime.xml`.
+Categories={{categories}}
+{{#if comment}}
+Comment={{comment}}
+{{/if}}
+Exec={{exec}} %U
+Icon={{icon}}
+Name={{name}}
+Terminal=false
+Type=Application
+MimeType=text/x-pikchr;text/markdown;
+StartupWMClass={{name}}

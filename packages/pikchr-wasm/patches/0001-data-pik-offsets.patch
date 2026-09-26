@@ -1,0 +1,182 @@
+--- a/pikchr.y
++++ b/pikchr.y
+@@ -262,6 +262,7 @@
+ struct PToken {
+   const char *z;             /* Pointer to the token text */
+   unsigned int n;            /* Length of the token in bytes */
++  int iSrcOfs1;              /* data-pik: 1-based offset to report, 0 if none */
+   short int eCode;           /* Auxiliary code */
+   unsigned char eType;       /* The numeric parser code */
+   unsigned char eEdge;       /* Corner value for corner keywords */
+@@ -344,6 +345,7 @@
+   PPoint *aPath;           /* Array of path points */
+   PObj *pFrom, *pTo;       /* End-point objects of a path */
+   PBox bbox;               /* Bounding box */
++  int iSrcOfs1;            /* data-pik: 1-based offset override, 0 to use errTok */
+ };
+ 
+ /* A list of graphics objects */
+@@ -444,6 +446,9 @@
+ static void pik_append_clr(Pik*,const char*,PNum,const char*,int);
+ static void pik_append_style(Pik*,PObj*,int);
+ static void pik_append_txt(Pik*,PObj*, PBox*);
++static void pik_append_datapik(Pik*,PObj*);
++static int pik_src_offset(Pik*,const char*);
++static int pik_token_offset1(Pik*,PToken*);
+ static void pik_draw_arrowhead(Pik*,PPoint*pFrom,PPoint*pTo,PObj*);
+ static void pik_chop(PPoint*pFrom,PPoint*pTo,PNum);
+ static void pik_error(Pik*,PToken*,const char*);
+@@ -616,8 +621,12 @@
+ basetype(A) ::= CLASSNAME(N).            {A = pik_elem_new(p,&N,0,0); }
+ basetype(A) ::= STRING(N) textposition(P).
+                             {N.eCode = P; A = pik_elem_new(p,0,&N,0); }
+-basetype(A) ::= LB savelist(L) statement_list(X) RB(E).
+-      { p->list = L; A = pik_elem_new(p,0,0,X); if(A) A->errTok = E; }
++basetype(A) ::= LB(B) savelist(L) statement_list(X) RB(E).
++      { p->list = L; A = pik_elem_new(p,0,0,X);
++        if(A){ A->errTok = E;
++               /* data-pik: errTok is "]" so that errors point at the end of
++               ** the container; the offset should point at its start. */
++               A->iSrcOfs1 = pik_token_offset1(p, &B); } }
+ 
+ %type savelist {PList*}
+ // No destructor required as this same PList is also held by
+@@ -1999,7 +2008,9 @@
+   pik_append_xy(p,"<polygon points=\"", t->x, t->y);
+   pik_append_xy(p," ",bx-ddx, by-ddy);
+   pik_append_xy(p," ",bx+ddx, by+ddy);
+-  pik_append_clr(p,"\" style=\"fill:",pObj->color,"\"/>\n",0);
++  pik_append(p,"\"",1);
++  pik_append_datapik(p,pObj);
++  pik_append_clr(p," style=\"fill:",pObj->color,"\"/>\n",0);
+   pik_chop(f,t,h/2);
+ }
+ 
+@@ -2250,6 +2261,51 @@
+      p->rScale*r1, p->rScale*r2,
+      p->rScale*x, p->rScale*y);
+   buf[sizeof(buf)-1] = 0;
++  pik_append(p, buf, -1);
++}
++
++/* Byte offset of z[] within the input script, or -1 if z[] does not point
++** into it.  Not every token does: the "pikchr_date" keyword rewrites its
++** token to point at a static string literal.
++*/
++static int pik_src_offset(Pik *p, const char *z){
++  size_t d;
++  if( z==0 || p->sIn.z==0 ) return -1;
++  if( z<p->sIn.z ) return -1;
++  d = (size_t)(z - p->sIn.z);
++  if( d>=(size_t)p->sIn.n ) return -1;
++  return (int)d;
++}
++
++/* The 1-based offset to report for an object introduced by pTok.  The
++** tokenizer stamps every token it feeds to the parser (see pik_tokenize),
++** so this only falls back to the token text for tokens built elsewhere.
++** Returns 0 when there is none.  Offsets are stored 1-based so that a PObj
++** or PToken zeroed by memset() means "no offset" rather than "offset 0" —
++** the debug_label_color dots are rendered from exactly such an object.
++*/
++static int pik_token_offset1(Pik *p, PToken *pTok){
++  if( pTok->iSrcOfs1>0 ) return pTok->iSrcOfs1;
++  return pik_src_offset(p, pTok->z) + 1;
++}
++
++/* The byte offset of the statement that produced pObj, or -1 if there is
++** none.
++*/
++static int pik_obj_offset(Pik *p, PObj *pObj){
++  if( pObj->iSrcOfs1>0 ) return pObj->iSrcOfs1 - 1;
++  return pik_src_offset(p, pObj->errTok.z);
++}
++
++/* Append data-pik="N" to the SVG element being emitted, where N is the byte
++** offset of the statement that produced pObj.  Emits nothing when no offset
++** is recoverable.
++*/
++static void pik_append_datapik(Pik *p, PObj *pObj){
++  char buf[32];
++  int ofs = pik_obj_offset(p, pObj);
++  if( ofs<0 ) return;
++  snprintf(buf, sizeof(buf), " data-pik=\"%d\"", ofs);
+   pik_append(p, buf, -1);
+ }
+ 
+@@ -2266,6 +2322,7 @@
+ */
+ static void pik_append_style(Pik *p, PObj *pObj, int eFill){
+   int clrIsBg = 0;
++  pik_append_datapik(p, pObj);
+   pik_append(p, " style=\"", -1);
+   if( pObj->fill>=0 && eFill ){
+     int fillIsBg = 1;
+@@ -2531,6 +2588,7 @@
+     y += orig_y;
+ 
+     pik_append_x(p, "<text x=\"", nx, "\"");
++    pik_append_datapik(p, pObj);
+     pik_append_y(p, " y=\"", y, "\"");
+     if( t->eCode & TP_RJUST ){
+       pik_append(p, " text-anchor=\"end\"", -1);
+@@ -2973,6 +3031,7 @@
+     pNew->type = pik_find_class(&n);
+     assert( pNew->type!=0 );
+     pNew->errTok = *pStr;
++    pNew->iSrcOfs1 = pik_token_offset1(p, pStr);
+     pNew->type->xInit(p, pNew);
+     pik_add_txt(p, pStr, pStr->eCode);
+     return pNew;
+@@ -2980,6 +3039,7 @@
+   if( pId ){
+     const PClass *pClass;
+     pNew->errTok = *pId;
++    pNew->iSrcOfs1 = pik_token_offset1(p, pId);
+     pClass = pik_find_class(pId);
+     if( pClass ){
+       pNew->type = pClass;
+@@ -4222,6 +4282,9 @@
+ static void pik_elem_setname(Pik *p, PObj *pObj, PToken *pName){
+   if( pObj==0 ) return;
+   if( pName==0 ) return;
++  /* data-pik: a Label is the first token of the statement that carries it,
++  ** so the offset should point there rather than at the object keyword. */
++  pObj->iSrcOfs1 = pik_token_offset1(p, pName);
+   free(pObj->zName);
+   pObj->zName = malloc(pName->n+1);
+   if( pObj->zName==0 ){
+@@ -4489,7 +4552,17 @@
+         xRender(p, pObj);
+       }
+       if( pObj->pSublist ){
++        /* data-pik: a [] container emits no element of its own, so its
++        ** children are wrapped in a group that carries the offset.  A <g>
++        ** with no other attributes does not affect rendering. */
++        int iOfs = pik_obj_offset(p, pObj);
++        if( iOfs>=0 ){
++          pik_append(p, "<g", 2);
++          pik_append_datapik(p, pObj);
++          pik_append(p, ">\n", 2);
++        }
+         pik_elist_render(p, pObj->pSublist);
++        if( iOfs>=0 ) pik_append(p, "</g>\n", 5);
+       }
+     }
+   }while( bMoreToDo );
+@@ -5314,6 +5387,15 @@
+         pik_error(p, &token, "script is too complex");
+         break;
+       }
++      /* data-pik: stamp the token with the offset to report for it — the
++      ** outermost macro call site if it came out of an expansion, else its
++      ** own place in the script.  It rides on the token because the parser
++      ** reduces a statement only once the following token arrives, which
++      ** for the last statement in a macro body is after the expansion has
++      ** been popped off p->aCtx[]; and because "pikchr_date" is about to
++      ** point token.z at a string literal instead of the script. */
++      token.iSrcOfs1 = p->nCtx>0 ? pik_src_offset(p, p->aCtx[0].z)+1
++                                 : pik_src_offset(p, token.z)+1;
+       if( token.eType==T_ISODATE ){
+         token.z = "\"" MANIFEST_ISODATE "\"";
+         token.n = sizeof(MANIFEST_ISODATE)+1;

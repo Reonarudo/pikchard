@@ -1,0 +1,10 @@
+line right 2cm then down .5cm then up 1cm right 1cm \
+   then up 1cm left 1cm then down .5cm then left 2cm \
+   close "with 'close'"
+dot color red at last line.end
+
+move to 2.5cm south of last line.start
+line right 2cm then down .5cm then up 1cm right 1cm \
+   then up 1cm left 1cm then down .5cm then left 2cm \
+   then down 1cm "without 'close'"
+dot color red at last line.end

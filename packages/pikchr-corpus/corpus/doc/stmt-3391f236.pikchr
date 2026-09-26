@@ -1,0 +1,3 @@
+   box "Normal"
+   move
+   box "Double" "Thick" thickness 2*(thickness)

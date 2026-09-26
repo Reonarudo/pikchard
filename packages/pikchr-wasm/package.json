@@ -1,0 +1,28 @@
+{
+  "name": "@pikchard/pikchr-wasm",
+  "version": "0.1.0",
+  "description": "Patched pikchr built to WebAssembly, with a TypeScript wrapper and Render Error parser",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "wasm"
+  ],
+  "devDependencies": {
+    "@pikchard/pikchr-corpus": "*"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "build:wasm": "./scripts/build-wasm.sh",
+    "goldens": "./scripts/gen-goldens.sh",
+    "verify:wasm": "./scripts/verify-wasm.sh"
+  }
+}

@@ -1,0 +1,6 @@
+C: cylinder
+line thin left from C.nw - (2mm,0)
+line thin left from C.nw - (2mm,C.radius)
+arrow <- from 3/4<first line.start,first line.end> up 30%
+arrow <- from 3/4<2nd line.start,2nd line.end> down 30%
+text "radius" above at end of 1st arrow

@@ -1,0 +1,3 @@
+box "with" "\"fit\"" fit
+move
+box "without" "\"fit\""

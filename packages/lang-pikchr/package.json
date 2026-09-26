@@ -1,0 +1,35 @@
+{
+  "name": "@pikchard/lang-pikchr",
+  "version": "0.1.0",
+  "description": "Lezer grammar and CodeMirror 6 language support for Pikchr",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "parser"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "build:grammar": "node ./scripts/build-grammar.mjs"
+  },
+  "dependencies": {
+    "@codemirror/language": "^6.12.4",
+    "@lezer/common": "^1.5.2",
+    "@lezer/highlight": "^1.2.3",
+    "@lezer/lr": "^1.4.10"
+  },
+  "devDependencies": {
+    "@codemirror/state": "^6.7.5",
+    "@lezer/generator": "^1.8.0",
+    "@pikchard/pikchr-corpus": "^0.1.0",
+    "@types/node": "^22.20.4"
+  }
+}

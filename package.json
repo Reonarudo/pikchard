@@ -1,0 +1,34 @@
+{
+  "name": "pikchard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A live editor for Pikchr diagrams, as a web app and a desktop app",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "app"
+  ],
+  "engines": {
+    "node": ">=22.13.0 <23"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev -w @pikchard/app",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "e2e": "npm run e2e -w @pikchard/app",
+    "tauri": "npm run tauri -w @pikchard/app",
+    "clean": "tsc --build --clean && rm -rf app/dist"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "jsdom": "^29.1.1",
+    "typescript": "7.0.2",
+    "vite": "8.3.0",
+    "vitest": "5.0.0"
+  }
+}

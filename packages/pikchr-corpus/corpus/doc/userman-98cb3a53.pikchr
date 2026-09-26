@@ -1,0 +1,4 @@
+    up
+    line
+    box  "Hello,"  "World!"
+    arrow

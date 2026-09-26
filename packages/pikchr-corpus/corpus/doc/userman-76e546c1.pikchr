@@ -1,0 +1,4 @@
+    boxwid = 0; boxht = 0;
+    box "Hello";
+    move
+    box "A longer label" "with multiple lines" "of label text"

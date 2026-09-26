@@ -1,0 +1,12 @@
+   boxwid = 0
+   boxht = 0
+   right
+   box "normal"
+   move
+   box "thin" thin
+   move
+   box "thick" thick
+   move
+   box "thick thick thick" thick thick thick
+   move
+   box "invisible" invisible

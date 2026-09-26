@@ -1,0 +1,17 @@
+define drawline { arrow from $1 to $2 chop }
+define drawline2 {  drawline(  $1  ,  $2  )  }
+define drawline3 {  drawline( \
+    $1 \
+ ,  $2  )  }
+circle "A" at (0,0) radius 0.5cm
+circle "B" at (1,0) radius 0.5cm
+circle "C" at (1,1) radius 0.5cm
+circle "D" at (2,1) radius 0.5cm
+drawline(A,B)
+drawline2(B,C)
+drawline3(C,D)
+
+down
+text "Macros with backslash-escapes around parameters" \
+      with .n at 0.5cm below B.s fit
+text "/forumpost/2026-04-02T16:50:17z" fit

@@ -1,0 +1,4 @@
+box "Origin"
+Obstacle: oval ht 300% wid 30% with .n at linewid right of Origin.ne;
+box "Destination" with .nw at linewid right of Obstacle.n
+line invis from 1st oval.s to 1st oval.n "Obstacle" aligned

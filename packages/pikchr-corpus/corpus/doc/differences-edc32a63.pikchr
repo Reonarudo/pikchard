@@ -1,0 +1,3 @@
+box thick thick fill lightgray "box" "thick" "fill lightgray"
+move
+file same as last box "file" "same as" "last box" rad filerad

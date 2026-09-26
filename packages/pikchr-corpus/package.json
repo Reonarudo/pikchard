@@ -1,0 +1,26 @@
+{
+  "name": "@pikchard/pikchr-corpus",
+  "version": "0.1.0",
+  "description": "Every Pikchr Script the pinned upstream check-in ships, committed and readable",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "corpus"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.20.2"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --build",
+    "test": "vitest run",
+    "extract": "node ./scripts/extract.mjs"
+  }
+}

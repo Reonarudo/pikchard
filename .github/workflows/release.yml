@@ -1,0 +1,217 @@
+name: Release
+
+# One `v*` tag does two independent things (ADR 0001, #1096):
+#
+# - builds every desktop installer into ONE draft release, which a human
+#   publishes only after docs/desktop-release-checklist.md passes, then adds
+#   a GPG-signed SHA256SUMS and a build attestation for each file;
+# - deploys the web build to GitHub Pages.
+#
+# There is deliberately no `needs:` between them. A withheld desktop artifact
+# leaves the web app live; the alternative is rolling back a Pages deploy.
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  version:
+    name: Version, release notes and the one draft
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      release-id: ${{ steps.draft.outputs.id }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          app="v$(node -p 'require("./app/src-tauri/tauri.conf.json").version')"
+          if [ "$app" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME but tauri.conf.json says $app"
+            exit 1
+          fi
+      # The release notes are written per release: features, then fixes from
+      # the second release on. The only thing added is the release key's
+      # fingerprint, read from release-key.asc so it cannot drift from it.
+      - run: |
+          file="docs/release-notes/$GITHUB_REF_NAME.md"
+          test -f "$file" || { echo "::error::No release notes at $file"; exit 1; }
+          fpr=$(gpg --show-keys --with-colons release-key.asc | awk -F: '$1=="fpr" { print $10; exit }' |
+            sed -E 's/(.{4})/\1 /g; s/^((.{5}){5})/\1 /; s/ $//')
+          { cat "$file"; echo; echo "Fingerprint: \`$fpr\`"; } > "$RUNNER_TEMP/notes.md"
+      # The draft is made here, once, and every leg uploads into it by id.
+      # Left to tauri-action, each leg creates the release when it starts, and
+      # two legs starting together each made their own draft (v0.1.0). A
+      # re-run of the whole workflow reuses the tag's draft rather than adding
+      # a second. Draft is load-bearing, not a default to tidy away:
+      # publishing is the human act that asserts the checklist passed (#1096).
+      - id: draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          id=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
+            --jq ".[] | select(.draft and .tag_name == \"$GITHUB_REF_NAME\") | .id" | head -1)
+          if [ -z "$id" ]; then
+            id=$(gh api "repos/$GITHUB_REPOSITORY/releases" \
+              -f tag_name="$GITHUB_REF_NAME" -f name="Pikchard $GITHUB_REF_NAME" \
+              -F draft=true -F prerelease=false -F body=@"$RUNNER_TEMP/notes.md" --jq .id)
+          else
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$id" -F body=@"$RUNNER_TEMP/notes.md" --silent
+          fi
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+  desktop:
+    name: Desktop installers (${{ matrix.name }})
+    needs: version
+    permissions:
+      contents: write
+    strategy:
+      # One leg failing must not cancel the rest: the gate is per artifact.
+      fail-fast: false
+      # Keep in step with ci.yml's `desktop` job.
+      matrix:
+        include:
+          - name: macOS universal
+            os: macos-latest
+            args: --target universal-apple-darwin --bundles app,dmg
+            rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
+          - name: Windows
+            os: windows-latest
+            args: --bundles nsis
+          - name: Linux
+            os: ubuntu-22.04
+            args: --bundles appimage,deb
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
+      # No rust-cache, unlike ci.yml: a shipped binary is built from clean,
+      # never from a cache any PR could have written.
+      - run: npm ci
+      # Tauri reads the notarization key from a file, and a secret is a string.
+      - if: runner.os == 'macOS'
+        env:
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: |
+          key="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s\n' "$APPLE_API_KEY_P8" > "$key"
+          echo "APPLE_API_KEY_PATH=$key" >> "$GITHUB_ENV"
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Developer ID signing and notarization (#1036). Tauri imports the
+          # certificate into a throwaway keychain, signs with the hardened
+          # runtime, notarizes the `.app` and staples the ticket before the
+          # `.dmg` is made from it. Only the macOS leg is handed the secrets;
+          # Windows and Linux are still unsigned.
+          APPLE_CERTIFICATE: ${{ runner.os == 'macOS' && secrets.APPLE_CERTIFICATE || '' }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ runner.os == 'macOS' && secrets.APPLE_CERTIFICATE_PASSWORD || '' }}
+          APPLE_SIGNING_IDENTITY: ${{ runner.os == 'macOS' && secrets.APPLE_SIGNING_IDENTITY || '' }}
+          APPLE_API_ISSUER: ${{ runner.os == 'macOS' && secrets.APPLE_API_ISSUER || '' }}
+          APPLE_API_KEY: ${{ runner.os == 'macOS' && secrets.APPLE_API_KEY || '' }}
+        with:
+          projectPath: app
+          tauriScript: npm run tauri
+          args: ${{ matrix.args }}
+          # The draft the `version` job made. Every leg uploads to this one
+          # draft, so one OS's artifact can be deleted on its own.
+          releaseId: ${{ needs.version.outputs.release-id }}
+      # A Developer ID signature that Gatekeeper accepts, and a stapled ticket,
+      # so the app opens offline on first launch. A missing secret makes Tauri
+      # fall back to no signature at all, and this is what catches it.
+      - if: runner.os == 'macOS'
+        working-directory: app/src-tauri/target/universal-apple-darwin/release/bundle/macos
+        run: |
+          codesign --verify --deep --strict Pikchard.app
+          spctl --assess --type execute --verbose=2 Pikchard.app
+          xcrun stapler validate Pikchard.app
+      # Tauri notarizes the `.app` but only signs the `.dmg` around it, which
+      # Gatekeeper rejects as "Unnotarized Developer ID" — and the `.dmg` is
+      # what a user downloads. So notarize and staple it here, and replace the
+      # copy tauri-action already uploaded to the draft.
+      - if: runner.os == 'macOS'
+        working-directory: app/src-tauri/target/universal-apple-darwin/release/bundle/dmg
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+        run: |
+          dmg=$(ls *.dmg)
+          xcrun notarytool submit "$dmg" --wait \
+            --key "$APPLE_API_KEY_PATH" --key-id "$APPLE_API_KEY" --issuer "$APPLE_API_ISSUER"
+          xcrun stapler staple "$dmg"
+          spctl --assess --type open --context context:primary-signature --verbose=2 "$dmg"
+          gh release upload "$GITHUB_REF_NAME" "$dmg" --clobber
+
+  # Something a user can check on every OS, Linux included, which has no
+  # notarization of its own: a GPG-signed SHA256SUMS over the draft's files,
+  # and a build attestation for each of them (`gh attestation verify`). Done
+  # here rather than in each leg because only now are the files final — the
+  # `.dmg` is replaced after notarizing, and tauri-action renames on upload.
+  checksums:
+    name: Signed checksums and build attestations
+    needs: desktop
+    # Runs when a leg failed, too: the gate is per artifact, so the draft
+    # still ships whatever did build. Deleting an artifact from the draft
+    # later means re-running this job, or SHA256SUMS lists a missing file.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          test -n "$GPG_PRIVATE_KEY" || { echo "::error::GPG_PRIVATE_KEY is not set"; exit 1; }
+          mkdir assets && cd assets
+          gh release download "$GITHUB_REF_NAME" -R "$GITHUB_REPOSITORY"
+          # A re-run finds the previous run's pair in the draft.
+          rm -f SHA256SUMS SHA256SUMS.asc
+          sha256sum -- * > SHA256SUMS
+          printf '%s\n' "$GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --batch --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" \
+            --armor --detach-sign SHA256SUMS
+          gpg --verify SHA256SUMS.asc SHA256SUMS
+          cat SHA256SUMS
+          gh release upload "$GITHUB_REF_NAME" SHA256SUMS SHA256SUMS.asc --clobber -R "$GITHUB_REPOSITORY"
+      - uses: actions/attest-build-provenance@v4
+        with:
+          subject-checksums: assets/SHA256SUMS
+
+  pages:
+    name: Web app to GitHub Pages
+    needs: version
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # `TAURI_ENV_PLATFORM` must be unset: it is what gives this build its
+      # service worker, its CSP and its `/pikchard/` base (#1025).
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: app/dist
+      - id: deploy
+        uses: actions/deploy-pages@v4
