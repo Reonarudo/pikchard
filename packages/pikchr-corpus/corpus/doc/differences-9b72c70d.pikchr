@@ -1,0 +1,9 @@
+oval "oval"
+move
+diamond "diamond"
+move
+cylinder "cylinder"
+move
+file "file"
+move
+dot "  dot" ljust

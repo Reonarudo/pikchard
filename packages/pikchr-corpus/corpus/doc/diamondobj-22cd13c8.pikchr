@@ -1,0 +1,2 @@
+box invis "“Diamond”" "Label"
+line from last.w to last.n to last.e to last.s close

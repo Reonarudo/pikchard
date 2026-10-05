@@ -1,0 +1,3 @@
+   box "Color: CadetBlue" "Fill: Bisque" fill Bisque color CadetBlue fit
+   move
+   oval "Color: White" "Fill: RoyalBlue" color White fill ROYALBLUE fit

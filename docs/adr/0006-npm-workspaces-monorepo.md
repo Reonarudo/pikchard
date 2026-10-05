@@ -1,0 +1,3 @@
+# npm-workspaces monorepo with two publishable packages and one app
+
+The repo is an npm-workspaces monorepo: `packages/pikchr-wasm` (patched build, TypeScript wrapper, Render Error parser), `packages/lang-pikchr` (Lezer grammar, CodeMirror language support, keyword catalogue) and `app/` (React + Vite with `src-tauri/` inside). mermalaid is a single app tree; we split because the grammar and the renderer are useful on their own (no CodeMirror 6 grammar for Pikchr exists) and because the app must not know how the WASM is built. npm rather than pnpm because it is already installed and workspaces are enough.

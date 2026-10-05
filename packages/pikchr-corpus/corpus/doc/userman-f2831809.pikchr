@@ -1,0 +1,8 @@
+    B1:  box; move;
+         circle; move;
+         ellipse; move;
+    C1:  cylinder
+         arrow from B1.s \
+            down 1cm \
+            then right until even with C1 \
+            then to C1.s

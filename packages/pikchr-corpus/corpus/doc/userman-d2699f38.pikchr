@@ -1,0 +1,5 @@
+    box; move; circle; move; cylinder
+    arrow from first box.s \
+          down 1cm \
+          then right until even with first cylinder \
+          then to first cylinder.s

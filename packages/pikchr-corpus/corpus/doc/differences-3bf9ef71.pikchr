@@ -1,0 +1,6 @@
+boxrad = 12px
+box color blue "color blue"
+move
+box fill lightgray "fill lightgray"
+move
+box color white fill blue "color white" "fill blue"

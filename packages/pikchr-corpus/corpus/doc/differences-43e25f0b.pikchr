@@ -1,0 +1,8 @@
+boxrad = 12px
+box thin "thin"
+move
+box "(default)" italic
+move
+box thick "thick"
+move
+box thick thick "thick" "thick"

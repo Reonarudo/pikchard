@@ -1,0 +1,24 @@
+{
+  "$comment": "Written by scripts/extract.mjs. `checkin` must match packages/pikchr-wasm/vendor/pikchr.lock.json.",
+  "checkin": "a7f1c35bc0448daf15e2bafa36e510c1517534e620c452ecb314ed57d974f081",
+  "short": "a7f1c35b",
+  "total": 261,
+  "counts": {
+    "doc": 148,
+    "examples": 3,
+    "fuzzcases": 3,
+    "grammar": 4,
+    "tests": 103
+  },
+  "duplicateFences": [
+    "doc/userman-1c718459.pikchr",
+    "doc/userman-1f483a1a.pikchr",
+    "doc/userman-200e523c.pikchr",
+    "doc/userman-3ad86113.pikchr",
+    "doc/userman-75243cd5.pikchr",
+    "doc/userman-82656931.pikchr",
+    "doc/userman-9af4540f.pikchr",
+    "doc/userman-d2699f38.pikchr",
+    "doc/userman-d4f8376d.pikchr"
+  ]
+}

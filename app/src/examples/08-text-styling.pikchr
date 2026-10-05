@@ -1,0 +1,9 @@
+box "Bold" bold
+move
+box "Italic" italic
+move
+box "mono" mono
+move
+box "big" big
+move
+box "fit" "two lines" fit

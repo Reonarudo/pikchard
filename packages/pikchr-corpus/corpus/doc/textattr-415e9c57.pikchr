@@ -1,0 +1,2 @@
+  box ht 200% wid 50%
+  line invis from previous.s to previous.n "rotated text" aligned

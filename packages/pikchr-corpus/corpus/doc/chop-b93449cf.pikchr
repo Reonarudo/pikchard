@@ -1,0 +1,4 @@
+file "A"
+cylinder "B" at 5cm heading 125 from A
+arrow <-> from A to B "from A to B" aligned above color red
+arrow <-> from A to B chop "from A to B chop" aligned below color blue
