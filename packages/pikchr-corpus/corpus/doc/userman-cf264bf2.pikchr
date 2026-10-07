@@ -1,0 +1,5 @@
+   boxwid = 0
+   boxht = 0
+   box "fully visible"
+   box invisible color gray "outline invisible"
+   box same solid "outline visible again" fit

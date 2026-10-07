@@ -1,0 +1,7 @@
+/* 01 */        down
+/* 02 */  Root: dot "First \"Root\"" above color red
+/* 03 */        circle wid 50% at Root + (1.5cm, -1.5cm)
+/* 04 */        arrow dashed from previous to Root chop
+/* 05 */  Root: 3cm right of Root   // Move the location of Root 3cm right
+/* 06 */        arrow from last circle to Root chop
+/* 07 */        dot "Second \"Root\"" above color blue at Root

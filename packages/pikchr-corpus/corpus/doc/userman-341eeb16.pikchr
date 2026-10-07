@@ -1,0 +1,3 @@
+C1: cylinder "text in a" "cylinder" rad 120%
+    dot color red at C1.c
+    dot color blue at 0.75*C1.rad below C1.c

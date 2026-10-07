@@ -1,0 +1,52 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!.claude",
+      "!**/dist",
+      "!**/target",
+      "!app/src-tauri/gen",
+      "!**/playwright-report",
+      "!**/test-results",
+      "!package-lock.json",
+      "!packages/pikchr-wasm/wasm",
+      "!packages/pikchr-wasm/vendor",
+      "!packages/pikchr-wasm/test/corpus",
+      "!packages/pikchr-corpus/corpus",
+      "!packages/lang-pikchr/parser/pikchr.js",
+      "!packages/lang-pikchr/parser/pikchr.terms.js"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended"
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always"
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
+}

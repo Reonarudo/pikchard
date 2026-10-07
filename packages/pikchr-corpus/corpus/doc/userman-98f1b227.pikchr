@@ -1,0 +1,8 @@
+  B1: box
+  C1: circle with .w at 2cm right of B1.e
+
+  X1: line thin color gray down 50% from 2mm south of B1.se
+  X2: line same from (C1.w,X1.start)
+      arrow <-> thin from 3/4<X1.start,X1.end> right until even with X2 \
+         "2cm" above color gray
+      assert( last arrow.width == 2cm )

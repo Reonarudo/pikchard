@@ -1,0 +1,6 @@
+A: circle "A"
+B: circle "B" at A + (1.6, 0.9)
+C: circle "C" at A + (3.2, 0)
+spline -> from A.n up 0.5 then right 1.2 then to B.w
+arc -> cw from B.e to C.n
+line from A to C chop dashed

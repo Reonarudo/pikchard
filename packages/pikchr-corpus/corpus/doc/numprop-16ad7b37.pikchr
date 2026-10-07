@@ -1,0 +1,5 @@
+cylinder "radius 50%" rad 50%
+move
+cylinder "radius 100%" rad 100%
+move
+cylinder "radius 200%" "height 200%" rad 200% ht 200%

@@ -1,0 +1,5 @@
+arrow up 1.5cm right 1.5cm then down .5cm right 1cm then up .5cm right .3cm \
+   then down 2.5cm right 1cm "text"
+box color red thin thin width previous.wid height previous.ht \
+   with .c at previous.c
+dot at last arrow.c color red behind last arrow

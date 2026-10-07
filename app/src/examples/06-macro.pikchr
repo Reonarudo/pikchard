@@ -1,0 +1,5 @@
+define stage { box $1 rad 6px fill 0xeef4ff; arrow }
+stage("Lex")
+stage("Parse")
+stage("Layout")
+box "SVG" rad 6px fill 0xe3f6e3

@@ -1,0 +1,5 @@
+leftmargin = 1cm;
+P1: dot; text "P1" with .s at 2mm above P1
+P2: dot at P1+(2cm,-2cm); text "P2" with .s at 2mm above P2
+dot at (P1,P2); text "(P1,P2)" with .s at 2mm above last dot
+dot at (P2,P1); text "(P2,P1)" with .s at 2mm above last dot

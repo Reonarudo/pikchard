@@ -1,0 +1,4 @@
+    down
+    box "Auto-fit text annotation" "as is" fit
+    move 50%
+    box "Auto-fix text annotation" "with 125% width" fit width 125%

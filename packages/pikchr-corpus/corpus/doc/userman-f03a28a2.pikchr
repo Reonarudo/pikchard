@@ -1,0 +1,3 @@
+   box "box containing" "three lines" "of text" fit
+   move
+   arrow "Labeled" "line" wid 200%

@@ -1,0 +1,2 @@
+C1: cylinder rad 120%
+    text "text in a" "cylinder" at C1.c

@@ -1,0 +1,30 @@
+A: box
+dot color red at A.nw ".nw " rjust above
+dot same at A.w ".w " rjust
+dot same at A.sw ".sw " rjust below
+dot same at A.s ".s" below
+dot same at A.se " .se" ljust below
+dot same at A.e " .e" ljust
+dot same at A.ne " .ne" ljust above
+dot same at A.n ".n" above
+dot same at A.c " .c" ljust
+A: circle at 1.5 right of A
+dot color red at A.nw ".nw " rjust above
+dot same at A.w ".w " rjust
+dot same at A.sw ".sw " rjust below
+dot same at A.s ".s" below
+dot same at A.se " .se" ljust below
+dot same at A.e " .e" ljust
+dot same at A.ne " .ne" ljust above
+dot same at A.n ".n" above
+dot same at A.c " .c" ljust
+A: cylinder at 1.5 right of A
+dot color red at A.nw ".nw " rjust above
+dot same at A.w ".w " rjust
+dot same at A.sw ".sw " rjust below
+dot same at A.s ".s" below
+dot same at A.se " .se" ljust below
+dot same at A.e " .e" ljust
+dot same at A.ne " .ne" ljust above
+dot same at A.n ".n" above
+dot same at A.c " .c" ljust

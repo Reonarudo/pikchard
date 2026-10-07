@@ -1,0 +1,10 @@
+A: ellipse thin
+dot ".c" below at A
+dot ".n" above at A.n
+dot " .ne" ljust above at A.ne
+dot " .e" ljust at A.e
+dot " .se" ljust below at A.se
+dot ".s" below at A.s
+dot ".sw " rjust below at A.sw
+dot ".w " rjust at A.w
+dot ".nw " rjust above at A.nw

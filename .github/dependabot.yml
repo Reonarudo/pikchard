@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # The whole npm workspace (ADR 0006) has one lock file, at the root.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: cargo
+    directory: /app/src-tauri
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]

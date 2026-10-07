@@ -1,0 +1,5 @@
+  arrow go 150% heading 30 "aligned" aligned above
+  move to 1cm east of previous.end
+  arrow go 150% heading 170 "aligned" aligned above
+  move to 1cm east of previous.end
+  arrow go 150% north "aligned" aligned above

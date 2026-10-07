@@ -1,0 +1,23 @@
+$r = 0.2in
+linerad = 0.75*$r
+linewid = 0.25
+
+# Start and end blocks
+#
+box "define-statement" bold fit
+line down 50% from last box.sw
+START: dot rad 250% color black
+X0: last.e
+move right 3.2in
+END: box wid 5% ht 25% fill black
+X9: last.w
+
+# The main rule
+#
+arrow from X0 right 2*linerad+arrowht
+oval "\"define\"" fit
+arrow
+oval "MACRONAME" fit
+arrow
+oval "{...}" fit
+line right to X9

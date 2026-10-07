@@ -1,0 +1,5 @@
+   oval "Hello, World!" fit
+   print "Oval at: ",previous.x, ",", previous.y
+   line
+   oval "2nd oval" fit
+   print "2nd oval at: ",previous.x, ",", previous.y

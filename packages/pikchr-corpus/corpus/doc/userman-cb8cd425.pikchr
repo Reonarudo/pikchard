@@ -1,0 +1,6 @@
+    A: [
+      oval "Hello"
+      arrow
+      box "World" radius 4px
+    ]
+    Caption: text "Diagram Caption" italic with .n at 0.1in below A.s
