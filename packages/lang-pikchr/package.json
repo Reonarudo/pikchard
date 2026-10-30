@@ -21,14 +21,14 @@
     "build:grammar": "node ./scripts/build-grammar.mjs"
   },
   "dependencies": {
-    "@codemirror/language": "^6.12.4",
-    "@lezer/common": "^1.5.2",
-    "@lezer/highlight": "^1.2.3",
-    "@lezer/lr": "^1.4.10"
+    "@codemirror/language": "^6.13.1",
+    "@lezer/common": "^1.5.4",
+    "@lezer/highlight": "^1.2.5",
+    "@lezer/lr": "^1.4.11"
   },
   "devDependencies": {
-    "@codemirror/state": "^6.7.5",
-    "@lezer/generator": "^1.8.0",
+    "@codemirror/state": "^6.7.6",
+    "@lezer/generator": "^1.8.1",
     "@pikchard/pikchr-corpus": "*",
     "@types/node": "^22.20.4"
   }
